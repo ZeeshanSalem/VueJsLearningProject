@@ -12,34 +12,41 @@
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container-fluid">
-            <a class="nav-brand" href="#">My Vue</a>
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li v-for="(link, index) in links" class="nav-item" key="index">
-                    <a class="nav-link" aria-current="page" v-bind:href="link.url"
-                        :title="`this link goes to ${link.text}`">{{ link.text }}</a>
-                </li>
 
-            </ul>
-        </div>
-    </nav>
 
-    <div id='content' class='container'>
-        <h1>{{ pageTitle }}</h1>
-        <h2> {{ content }}</h2>
-    </div>
+    <navbar :pages="pages" :active-page="activePage" :nav-link-click="(index)=> activePage  = index"></navbar>
 
+    <!--This vus js component-->
+    <!-- one option -->
+    <!-- <page-viewer :page-title="pages[activePage].pageTitle" :page-content="pages[activePage].content"></page-viewer> -->
+
+    <!-- second option -->
+    <page-viewer :page="pages[activePage]"></page-viewer>
     <script>
-        Vue.createApp({
+        // Initialization of Application Data
+        let app = Vue.createApp({
+            // Its execute 
+            computed: {
+                // css properties
+                // navBarClasses() {
+                //     return {
+                //         'navbar-light': !this.useDarkNavBar, // Properties inside we need to used this
+                //         'bg-light': !this.useDarkNavBar,
+                //         'navbar-dark': this.useDarkNavBar,
+                //         'bg-dark': this.useDarkNavBar
+                //     }
+                // }
+            },
+
             data() {
                 return {
-
+                    activePage: 0,
+                    // useDarkNavBar: true,
                     pages: [
                         {
                             link: { text: 'Home', url: 'index.html' },
                             pageTitle: "Hello Page",
-                            content: "Welcome to Vue Js world"
+                            content: "this is home page"
                         },
 
                         {
@@ -56,15 +63,90 @@
                     ],
                 };
             }
-        }).mount('body');
+
+        });
+
+        app.component('page-viewer', {
+
+            props: ['page'],
+            template: `
+            <div  class='container'>
+                <h1>{{page.pageTitle}}</h1>
+                <p>{{page.content }}</p>
+            </div>`,
+        });
+
+        app.component('navbar', {
+            props: ['pages', 'activePage', 'navLinkClick'],
+            template: `
+            <nav class="navbar navbar-expand-lg" 
+            :class="[ \`navbar-\${theme}\`, \`bg-\${theme}\`,'navbar', 'navbar-expand-lg'  ]">
+        <div class="container-fluid">
+            <a class="nav-brand" href="#">My Vue</a>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li v-for="(page, index) in pages" class="nav-item" :key="index">
+                    <a class="nav-link" :class="{active : activePage == index}" aria-current="page"
+                        v-bind:href="page.link.url" :title="\`this link goes to \${page. link.text}\`"
+                        @click.prevent="navLinkClick(index)">{{
+                        page.link.text
+                        }}</a>
+                </li>
+            </ul>
+
+            <form class="d-flex">
+                <!-- <button class="btn btn-primary" @click.prevent="useDarkNavBar = !useDarkNavBar">Toggle Nav Bar </button> -->
+                <button class="btn btn-primary" @click.prevent="changeTheme()">Toggle Nav
+                    Bar </button>
+
+            </form>
+        </div>
+    </nav>`,
+
+            data() {
+                return {
+                    theme: 'dark'
+
+                }
+            },
+
+            methods: {
+                changeTheme() {
+                    let theme = 'light';
+
+                    if (this.theme == 'light') {
+                        theme = 'dark';
+                    } else {
+                        theme = 'light';
+                    }
+
+                    this.theme = theme;
+                }
+            },
+        });
+
+        app.mount('body');
 
     </script>
 </body>
 
 </html>
 <!--
-    Download
+    Things.
     1. Vue Language Features (Volar) Externsion.
     2. Vue.js devtools. chrome Extension.
     3. https://www.youtube.com/watch?v=1GNsWa_EZdw (27:00).
+    4. (v-on:click = "" ) == (@click = "") // Method
+    5. v-bind:class == :class // Class
+    6. :class="{'navbar-light bg-light' : !useDarkNavBar,'navbar-dark bg-dark' : useDarkNavBar}"> Combine css class binding
+
 -->
+
+<!--First Option with computing logic-->
+<!-- <nav class="navbar navbar-expand-lg" :class="navBarClasses"> -->
+
+<!--Secong Option without  computing logic-->
+<!-- <nav class="navbar navbar-expand-lg" :class="[
+    useDarkNavBar ? 'navbar-dark' : 'navbar-light',
+    useDarkNavBar ? 'bg-dark' : 'bg-light',
+    'navbar', 'navbar-expand-lg'
+    ]"> -->
